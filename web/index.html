@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ANPR RUS</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+</head>
+<body>
+    <div class="card">
+        <h1>ANPR RUS</h1>
+        <h3>Система распознавания автомобильных номеров</h3>
+    </div>
+    <div id="input" class="card">
+        <button id="input-image-button">Выбрать изображение</button>
+        <input type="file" id="input-image-file" accept="image/*" hidden>
+        <img id="input-image" hidden>
+        <button id="input-submit" hidden>Обработать изображение</button>
+    </div>
+    <div id="loading" class="card" hidden>
+        <h2>Загрузка...</h2>
+        <div id="spinner"></div>
+    </div>
+    <div id="output" class="card" hidden>
+        <div id="output-status">
+            <h2>Обнаружено номеров: <span id="output-detected"></span></h2>
+            <h2>Распознано номеров: <span id="output-recognized"></span></h2>
+        </div>
+        <img id="output-image">
+        <div id="output-plates"></div>
+        <template id="output-plate-template">
+            <div class="output-plate">
+                <div><b>Номер: <span class="output-plate-number"></span></b></div>
+                <div>Точность: <span class="output-plate-accuracy"></span></div>
+                <div>Координаты: <span class="output-plate-coordinates"></span></div>
+                <div>Размеры: <span class="output-plate-sizes"></span></div>
+            </div>
+        </template>
+    </div>
+</body>
+</html>
