@@ -6,7 +6,9 @@ tasks:
       python -m venv .venv
       source .venv/bin/activate
       pip install --requirement requirements.txt
-    command: python main.py
+    command: |
+      source .venv/bin/activate
+      python main.py
 
 vscode:
   extensions:
