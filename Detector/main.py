@@ -3,7 +3,7 @@ from ultralytics import YOLO
 
 
 class Detector:
-    def __init__(self, img_path, model_path='model/best (2).pt'):
+    def __init__(self, img_path, model_path='model/best.pt'):
         self.__img_path = img_path
         self.model = YOLO(model_path)
         self.coords = []
