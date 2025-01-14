@@ -2,13 +2,17 @@ import cv2
 from ultralytics import YOLO
 import easyocr
 
+model_path='Detector/model/best.pt'
+model = YOLO(model_path)
+
+reader = easyocr.Reader(['ru'])
 
 class Detector:
-    def __init__(self, img_path, model_path='Detector/model/best.pt'):
-        self.__img_path = img_path
-        self.model = YOLO(model_path)
-        self.coords = []
-        self.reader = easyocr.Reader(['ru'])
+    def __init__(self, img_source):
+        self.__img_source = img_source
+        self.img = None
+        self.detected = 0
+        self.recognized = 0
 
     @staticmethod
     def show_img(img, window_name='Detected Image') -> None:
@@ -21,43 +25,37 @@ class Detector:
         cv2.rectangle(img, (x1, y1), (x2, y2), color, thickness)
 
     def open_img(self):
-        car_img = cv2.imread(self.__img_path)
-        if car_img is None:
-            raise FileNotFoundError(f"Не удалось загрузить изображение по пути: {self.__img_path}")
-        car_img = cv2.cvtColor(car_img, cv2.COLOR_BGR2RGB)
+        if isinstance(self.__img_source, str):
+            car_img = cv2.imread(self.__img_source)
+            if car_img is None:
+                raise FileNotFoundError(f"Не удалось загрузить изображение по пути: {self.__img_source}")
+            car_img = cv2.cvtColor(car_img, cv2.COLOR_BGR2RGB)
+        else:
+            car_img = self.__img_source
         return car_img
 
     def __plate_extract(self):
-        car_img = self.open_img()
+        car_img = self.img = self.open_img()
 
-        results = self.model(car_img)
+        results = model(car_img)
 
-        def process_boxes(img, result):
+        extracted_plates = []
+        for result in results:
             boxes = result.boxes.xyxy.cpu().numpy()
-
-            self.coords = result.boxes.xyxy.cpu().numpy()
             confidences = result.boxes.conf.cpu().numpy()
             class_ids = result.boxes.cls.cpu().numpy()
 
-            extracted_plates = []
-
             for box, confidence, class_id in zip(boxes, confidences, class_ids):
                 x1, y1, x2, y2 = map(int, box)
+                w = x2 - x1
+                h = y2 - y1
 
                 if class_id == 0:
-                    plate_img = img[y1:y2, x1:x2]
+                    plate_img = car_img[y1:y2, x1:x2].copy()
+                    extracted_plates.append((plate_img, confidence, (x1, y1), (w, h)))
                     self.draw_box(car_img, x1, y1, x2, y2)
-                    extracted_plates.append(plate_img)
-                    break
-            return extracted_plates
 
-        extracted_plates = process_boxes(car_img, results[0])
-
-        # self.show_img(car_img)
-        if len(extracted_plates) > 0:
-            return extracted_plates[0]
-        else:
-            return None
+        return extracted_plates
 
     def __resize_img(self, img, scale_percent: int):
         if img is None: return None
@@ -69,19 +67,25 @@ class Detector:
         return resized_img
 
     def get_license_plate(self):
-        extract_img = self.__plate_extract()
+        extracted_plates = self.__plate_extract()
 
-        if extract_img is not None:
+        result_plates = []
+        for extract_img, confidence, pos, size in extracted_plates:
+            self.detected += 1
+
             extract_img = self.__resize_img(extract_img, 150)
+            confidence = confidence.item()
 
-            result = self.reader.readtext(extract_img)
+            result = reader.readtext(extract_img)
 
             if result:
+                self.recognized += 1
                 plate_text = " ".join([text[1] for text in result])
                 print(f"Распознанный номер: {plate_text}")
             else:
+                plate_text = None
                 print("Не удалось распознать номер.")
 
-            return extract_img
-        else:
-            return None
+            result_plates.append((extract_img, plate_text, confidence, pos, size))
+
+        return result_plates

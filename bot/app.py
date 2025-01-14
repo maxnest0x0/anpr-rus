@@ -1,6 +1,9 @@
 import os
 from telegram import Update, Bot, InputMediaPhoto
 from telegram.ext import ApplicationBuilder, ContextTypes, MessageHandler, filters
+import numpy as np
+import cv2
+from Detector.main import Detector
 
 async def handle_photo(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try:
@@ -8,49 +11,32 @@ async def handle_photo(update: Update, context: ContextTypes.DEFAULT_TYPE):
         message = update.message
 
         file_id = message.photo[-1].file_id
-        file = await bot.get_file(file_id)
-        img_buf = bytes(await file.download_as_bytearray())
+        img_file = await bot.get_file(file_id)
+        img_buf = await img_file.download_as_bytearray()
+        np_arr = np.frombuffer(img_buf, np.uint8)
+        cv2_img = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
 
-        result = {
-            'image': img_buf,
-            'detected': 2,
-            'recognized': 2,
-            'plates': [
-                {
-                    'image': img_buf,
-                    'number': 'T212YT02',
-                    'accuracy': 0.9,
-                    'x': 10,
-                    'y': 20,
-                    'width': 30,
-                    'height': 40,
-                },
-                {
-                    'image': img_buf,
-                    'number': 'M567MA797',
-                    'accuracy': 0.9,
-                    'x': 40,
-                    'y': 30,
-                    'width': 20,
-                    'height': 10,
-                },
-            ],
-        }
+        detector = Detector(cv2_img)
+        result = detector.get_license_plate()
 
         images = []
         text = []
 
-        images.append(result['image'])
-        text.append(f'Обнаружено номеров: {result['detected']}')
-        text.append(f'Распознано номеров: {result['recognized']}')
+        img_buf = bytes(cv2.imencode('.png', detector.img)[1])
+        images.append(img_buf)
 
-        for plate in result['plates']:
-            images.append(plate['image'])
+        text.append(f'Обнаружено номеров: {detector.detected}')
+        text.append(f'Распознано номеров: {detector.recognized}')
+
+        for plate_img, plate_text, confidence, (x, y), (w, h) in result:
+            plate_img_buf = bytes(cv2.imencode('.png', plate_img)[1])
+            images.append(plate_img_buf)
+
             text.append('')
-            text.append(f'Номер: {plate['number'] or '?'}')
-            text.append(f'Точность: {plate['accuracy']:.2%}')
-            text.append(f'Координаты: {plate['x']}, {plate['y']}')
-            text.append(f'Размеры: {plate['width']} x {plate['height']}')
+            text.append(f'Номер: {plate_text or '?'}')
+            text.append(f'Точность: {confidence:.2%}')
+            text.append(f'Координаты: {x}, {y}')
+            text.append(f'Размеры: {w} x {h}')
 
         media = [InputMediaPhoto(image) for image in images]
         caption = '\n'.join(text)
