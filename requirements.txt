@@ -3,3 +3,4 @@ beautifulsoup4
 opencv-python
 flask
 ultralytics
+python-telegram-bot
