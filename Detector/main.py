@@ -1,12 +1,14 @@
 import cv2
 from ultralytics import YOLO
+import easyocr
 
 
 class Detector:
-    def __init__(self, img_path, model_path='model/best.pt'):
+    def __init__(self, img_path, model_path='Detector/model/best.pt'):
         self.__img_path = img_path
         self.model = YOLO(model_path)
         self.coords = []
+        self.reader = easyocr.Reader(['ru'])
 
     @staticmethod
     def show_img(img, window_name='Detected Image') -> None:
@@ -31,7 +33,6 @@ class Detector:
         results = self.model(car_img)
 
         def process_boxes(img, result):
-
             boxes = result.boxes.xyxy.cpu().numpy()
 
             self.coords = result.boxes.xyxy.cpu().numpy()
@@ -52,7 +53,7 @@ class Detector:
 
         extracted_plates = process_boxes(car_img, results[0])
 
-        self.show_img(car_img)
+        # self.show_img(car_img)
         if len(extracted_plates) > 0:
             return extracted_plates[0]
         else:
@@ -68,19 +69,19 @@ class Detector:
         return resized_img
 
     def get_license_plate(self):
-
         extract_img = self.__plate_extract()
 
         if extract_img is not None:
             extract_img = self.__resize_img(extract_img, 150)
+
+            result = self.reader.readtext(extract_img)
+
+            if result:
+                plate_text = " ".join([text[1] for text in result])
+                print(f"Распознанный номер: {plate_text}")
+            else:
+                print("Не удалось распознать номер.")
+
             return extract_img
         else:
             return None
-detector = Detector('path img')
-license_plate_image = detector.get_license_plate()
-
-if license_plate_image is not None:
-    Detector.show_img(license_plate_image, 'Extracted License Plate')
-
-else:
-    print("Не удалось обнаружить номерной знак на изображении")

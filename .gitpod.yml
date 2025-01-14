@@ -3,6 +3,7 @@ tasks:
       sudo apt-get update
       sudo apt-get install --assume-yes libgl1
     init: |
+      sudo git lfs pull
       python -m venv .venv
       source .venv/bin/activate
       pip install --requirement requirements.txt
