@@ -33,7 +33,7 @@ async def handle_photo(update: Update, context: ContextTypes.DEFAULT_TYPE):
             images.append(plate_img_buf)
 
             text.append('')
-            text.append(f'Номер: {plate_text or '?'}')
+            text.append(f'Номер: {plate_text or "?"}')
             text.append(f'Точность: {confidence:.2%}')
             text.append(f'Координаты: {x}, {y}')
             text.append(f'Размеры: {w} x {h}')
