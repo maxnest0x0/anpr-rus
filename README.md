@@ -59,8 +59,8 @@ For developers we provide an API endpoint, `POST http://176.222.54.175:5000/api/
 ## Screencasts
 ### Web page
 
-https://raw.githubusercontent.com/maxnest0x0/anpr-rus/refs/heads/master/screencasts/web.webm
+https://github.com/user-attachments/assets/90fdc453-fd1b-424b-b0b4-4eb3e50105e7
 
 ### Telegram bot
 
-https://raw.githubusercontent.com/maxnest0x0/anpr-rus/refs/heads/master/screencasts/bot.webm
+https://github.com/user-attachments/assets/68edc6be-d087-4539-b554-31e0d333bd05
