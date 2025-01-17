@@ -71,7 +71,7 @@ class ImageDownloader:
         for img in self.image_urls:
             if self.download_image(img, f"{self.dataset_path}/{i}.jpg"):
                 i += 1
-            time.sleep(1)
+            # time.sleep(1)
 
 
 if __name__ == "__main__":
