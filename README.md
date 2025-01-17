@@ -45,3 +45,22 @@ We have collected a dataset of 10007 images.
 They are located [here](https://drive.google.com/drive/folders/1hSRh3G7xV808UyMl6CouE4Bj75XGBi3f?usp=sharing).
 The [Dataset/license_plates.json](https://github.com/maxnest0x0/anpr-rus/blob/master/Dataset/license_plates.json) file contains the object detection markup and the car number text for each image.
 The `box` property contains `x`, `y`, `width`, `height` values ​​relative to the image dimensions.
+
+## Usage
+### Web page
+For PC users we host the web page at http://176.222.54.175:5000/.
+
+### Telegram bot
+For mobile users we run the Telegram bot [@AnprRusBot](https://t.me/AnprRusBot).
+
+### API
+For developers we provide an API endpoint, `POST http://176.222.54.175:5000/api/predict`, that accepts an `image` parameter.
+
+## Screencasts
+### Web page
+
+https://raw.githubusercontent.com/maxnest0x0/anpr-rus/refs/heads/master/screencasts/web.webm
+
+### Telegram bot
+
+https://raw.githubusercontent.com/maxnest0x0/anpr-rus/refs/heads/master/screencasts/bot.webm
