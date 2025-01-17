@@ -54,4 +54,4 @@ def serve_static(path):
     return send_from_directory(app.static_folder, path)
 
 def run_api():
-    app.run()
+    app.run('0.0.0.0')
